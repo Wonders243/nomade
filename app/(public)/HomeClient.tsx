@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { getProductRoute } from "@/lib/products/routing";
 import { motion, useScroll, useTransform } from "framer-motion";
 import ProductCard from "@/components/ProductCard";
 import { supabase } from "@/lib/supabase/client";
@@ -110,18 +111,18 @@ function CollectionProductShowcase({
             : "(max-width: 768px) 25vw, 12.5vw";
 
   return (
-    <div className="mt-6 mx-auto w-full max-w-[720px]">
+    <div className="mt-6 mx-auto w-full max-w-[620px]">
       <div
         className={`mx-auto grid ${gridClass} ${wrapperWidthClass} gap-1.5 md:gap-2`}
       >
         {showcaseItems.map((product) => (
           <Link
             key={product.id}
-            href={`/boutique/${product.slug || product.id}`}
+            href={getProductRoute(product)}
             className="group/showcase block w-full"
             aria-label={product.name}
           >
-            <div className="relative aspect-3/4 overflow-hidden bg-stone-200">
+            <div className="relative aspect-[3/4] overflow-hidden bg-stone-200 rounded-[1.1rem]">
               {product.image ? (
                 <Image
                   src={product.image}
@@ -160,8 +161,8 @@ function CollectionCard({
       viewport={{ once: true, margin: "-100px" }}
       transition={{ duration: 0.7, delay: index * 0.1 }}
       className={`
-        group relative grid grid-cols-1 lg:grid-cols-2 items-center gap-8 md:gap-14 lg:gap-24 xl:gap-32
-        py-16 lg:py-28
+        group relative grid grid-cols-1 lg:grid-cols-2 items-center gap-6 md:gap-10 lg:gap-14 xl:gap-20
+        py-8 md:py-12 lg:py-14
         ${index % 2 === 1 ? "lg:[&>*:first-child]:order-2" : ""}
       `}
     >
@@ -170,7 +171,7 @@ function CollectionCard({
         href={`/boutique/collection/${cat.slug}`}
         className="block w-full overflow-hidden"
       >
-        <div className="relative mx-auto w-full max-w-[720px] aspect-[4/5] bg-stone-100 overflow-hidden">
+        <div className="relative mx-auto w-full max-w-[700px] aspect-[4/5] bg-stone-100 overflow-hidden rounded-[1.5rem] shadow-[0_18px_50px_-24px_rgba(0,0,0,0.35)]">
           {cat.video ? (
             <video
               src={cat.video}
@@ -207,16 +208,16 @@ function CollectionCard({
       </Link>
 
       {/* DESKTOP TEXT */}
-      <div className="hidden mx-auto w-full max-w-xl px-4 text-center lg:block lg:px-0 lg:text-left">
-        <p className="mb-4 uppercase tracking-[0.35em] text-[11px] text-stone-400">
+      <div className="hidden mx-auto w-full max-w-[28rem] px-4 text-center lg:block lg:px-0 lg:text-left">
+        <p className="mb-3 uppercase tracking-[0.35em] text-[10px] text-stone-400">
           Collection
         </p>
 
-        <h3 className="text-3xl sm:text-4xl lg:text-5xl font-light leading-tight tracking-wide text-stone-900">
+        <h3 className="text-2xl sm:text-3xl lg:text-4xl font-light leading-tight tracking-wide text-stone-900">
           {cat.name}
         </h3>
 
-        <p className="mt-6 text-[15px] md:text-base leading-8 text-stone-500 font-light">
+        <p className="mt-4 text-[14px] md:text-[15px] leading-7 text-stone-500 font-light">
           {compactCopy(cat.description, 110)}
         </p>
 
@@ -224,7 +225,7 @@ function CollectionCard({
 
         <Link
           href={`/boutique/collection/${cat.slug}`}
-          className="mt-8 inline-flex items-center gap-3 border-b border-stone-300 pb-1 text-xs uppercase tracking-[0.35em] text-stone-700 hover:text-stone-900 hover:border-stone-900 transition-all duration-300 group/link"
+          className="mt-7 inline-flex items-center gap-3 border-b border-stone-300 pb-1 text-[10px] uppercase tracking-[0.32em] text-stone-700 hover:text-stone-900 hover:border-stone-900 transition-all duration-300 group/link"
         >
           Découvrir
           <span className="transition-transform duration-300 group-hover/link:translate-x-1">

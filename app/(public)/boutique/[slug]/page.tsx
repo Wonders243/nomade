@@ -4,6 +4,7 @@ import {
   getProductsList,
   getProductRating,
 } from "@/lib/products/queries";
+import { getProductRoute } from "@/lib/products/routing";
 import { notFound } from "next/navigation";
 import ProductClient from "./ProductClient";
 import type { Metadata } from "next";
@@ -30,7 +31,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
-  const canonicalPath = `/boutique/${product.slug || product.id}`;
+  const canonicalPath = getProductRoute(product);
   const title = `${product.name} | Boutique`;
   const description = product.description?.trim().length
     ? product.description.slice(0, 160)

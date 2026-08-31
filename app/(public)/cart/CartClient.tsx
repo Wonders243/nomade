@@ -6,6 +6,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/components/CartContext";
 import { trackEvent } from "@/lib/analytics/tracking";
+import { getProductRoute } from "@/lib/products/routing";
 import { toast } from "sonner";
 
 const isMaintenance =
@@ -290,7 +291,7 @@ function CartClient() {
                         <div>
 
                           <Link
-                            href={`/boutique/${item.id}`}
+                            href={getProductRoute(item as { slug?: string | null; id?: number | string | null })}
                             className="text-base md:text-lg font-light hover:text-stone-600 transition-colors"
                           >
                             {item.name}

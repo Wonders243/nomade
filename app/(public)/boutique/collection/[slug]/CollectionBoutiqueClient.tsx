@@ -83,16 +83,41 @@ function ProductMosaic({ products }: { products: Product[] }) {
     });
   }, [products]);
 
+  const compactLayout = products.length <= 2;
+
   return (
-    <div className="space-y-2 sm:space-y-2.5 md:space-y-3">
+    <div className={`space-y-2 sm:space-y-2.5 md:space-y-3 ${compactLayout ? "max-w-5xl mx-auto" : ""}`}>
       {rows.map((rowProducts, rowIndex) => (
         <div
           key={`row-${rowIndex}`}
-          className={`grid grid-cols-2 ${getDesktopRowColsClass(rowProducts.length)} gap-2 sm:gap-2.5 md:gap-3`}
+          className={
+            compactLayout
+              ? "grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-4"
+              : `grid grid-cols-2 ${getDesktopRowColsClass(rowProducts.length)} gap-2 sm:gap-2.5 md:gap-3`
+          }
         >
           {rowProducts.map((product) => (
-            <div key={product.id} className={rowProducts.length === 1 ? "col-span-2 lg:col-span-2" : ""}>
-              <ProductCard product={product} />
+            <div
+              key={product.id}
+              className={
+                compactLayout
+                  ? "flex justify-center"
+                  : rowProducts.length === 1
+                    ? "col-span-2 lg:col-span-2"
+                    : ""
+              }
+            >
+              <div
+                className={
+                  compactLayout
+                    ? "w-full max-w-[420px] mx-auto"
+                    : rowProducts.length === 1
+                      ? "max-w-[520px] mx-auto"
+                      : ""
+                }
+              >
+                <ProductCard product={product} />
+              </div>
             </div>
           ))}
         </div>

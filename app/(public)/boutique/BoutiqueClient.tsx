@@ -10,6 +10,7 @@ import ProductCard from "@/components/ProductCard";
 
 interface Product {
   id: number | string;
+  slug?: string | number;
   name: string;
   price: number;
   images: string[];
@@ -122,10 +123,10 @@ function BoutiqueClient({
       <div className="max-w-7xl mx-auto px-5 md:px-8 py-12 md:py-14">
         <div className="text-center mb-10">
           <h1 className="text-4xl md:text-6xl font-light tracking-tight text-stone-900 mb-3">
-            La collection
+            Collections
           </h1>
           <p className="text-stone-400 font-light text-base md:text-lg tracking-wide max-w-sm mx-auto">
-            Les pieces sont organisees par collection.
+            Les pièces sont organisées par collection.
           </p>
         </div>
 
@@ -251,9 +252,22 @@ function BoutiqueClient({
                     </div>
                   </Link>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2.5 md:gap-3">
+                  <div
+                    className={
+                      previewItems.length <= 2
+                        ? "mx-auto grid max-w-3xl grid-cols-1 gap-4 sm:grid-cols-2"
+                        : "grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2.5 md:gap-3"
+                    }
+                  >
                     {previewItems.map((product) => (
-                      <MemoizedProductCard key={product.id} product={product} />
+                      <div
+                        key={product.id}
+                        className={
+                          previewItems.length <= 2 ? "w-full max-w-[420px] mx-auto" : ""
+                        }
+                      >
+                        <MemoizedProductCard product={product} />
+                      </div>
                     ))}
                   </div>
 
