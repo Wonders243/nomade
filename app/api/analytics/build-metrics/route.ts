@@ -1,15 +1,18 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase/client";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 
 export async function GET() {
   try {
     const today = new Date().toISOString().split("T")[0];
 
-    const { data: events, error } = await supabase
+    const { data: events, error: readError } = await supabase
       .from("analytics_events")
       .select("*");
 
-    if (error) throw error;
+    if (readError) {
+      throw readError;
+    }
 
     const products = new Map<string, {
       views: number;
@@ -66,7 +69,7 @@ export async function GET() {
         stats.purchases * 0.4 +
         avgTime * 0.2;
 
-      await supabase
+      const { error: upsertError } = await supabaseAdmin
         .from("product_daily_metrics")
         .upsert(
           {
@@ -81,6 +84,24 @@ export async function GET() {
           { onConflict: "metric_date, product_id" }
         );
 
+      if (upsertError) {
+        console.error("product_daily_metrics upsert failed", {
+          productId,
+          today,
+          stats,
+          error: upsertError,
+        });
+
+        return NextResponse.json(
+          {
+            success: false,
+            error: "metrics_write_failed",
+            details: upsertError.message,
+          },
+          { status: 500 }
+        );
+      }
+
       generated++;
     }
 
@@ -88,10 +109,14 @@ export async function GET() {
       success: true,
       products_processed: generated,
     });
-  } catch (error) {
-    console.error(error);
+  } catch (error: any) {
+    console.error("build-metrics failed", error);
     return NextResponse.json(
-      { success: false, error: "metrics_generation_failed" },
+      {
+        success: false,
+        error: "metrics_generation_failed",
+        details: error?.message || "unknown_error",
+      },
       { status: 500 }
     );
   }
