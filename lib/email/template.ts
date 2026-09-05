@@ -19,7 +19,8 @@ const CONTACT_EMAIL =
   process.env.CONTACT_EMAIL ||
   process.env.NOREPLY_EMAIL ||
   "contact@nomade-artisan.fr";
-const SHOP_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://www.nomade-artisan.fr";
+const SHOP_URL =
+  process.env.NEXT_PUBLIC_BASE_URL || "https://scolta.nomade-artisan.fr";
 
 export function escapeHtml(value: string): string {
   return value
