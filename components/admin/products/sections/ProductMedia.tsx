@@ -11,6 +11,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 import {
   ProductFormState,
@@ -31,6 +41,8 @@ export default function ProductMedia({
   const inputRef = useRef<HTMLInputElement>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [compressionStats, setCompressionStats] = useState<string | null>(null);
+  const [pendingImageId, setPendingImageId] = useState<string | null>(null);
+  const [isRemovingImage, setIsRemovingImage] = useState(false);
 
   async function handleFiles(
     event: React.ChangeEvent<HTMLInputElement>
@@ -88,19 +100,24 @@ export default function ProductMedia({
   }
 
   function removeImage(id: string) {
-    setProduct((prev) => {
-      const images = prev.images.filter((image) => image.id !== id);
+    setIsRemovingImage(true);
+    try {
+      setProduct((prev) => {
+        const images = prev.images.filter((image) => image.id !== id);
 
-      // Si l'image supprimée était la cover, définir la première comme cover
-      if (images.length > 0 && !images.some((i) => i.isCover)) {
-        images[0].isCover = true;
-      }
+        if (images.length > 0 && !images.some((i) => i.isCover)) {
+          images[0].isCover = true;
+        }
 
-      return {
-        ...prev,
-        images,
-      };
-    });
+        return {
+          ...prev,
+          images,
+        };
+      });
+    } finally {
+      setPendingImageId(null);
+      setIsRemovingImage(false);
+    }
   }
 
   function setCover(id: string) {
@@ -165,7 +182,6 @@ export default function ProductMedia({
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                   />
                   
-                  {/* Badge WebP */}
                   <div className="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
                     WebP
                   </div>
@@ -188,7 +204,7 @@ export default function ProductMedia({
                     type="button"
                     variant="destructive"
                     className="w-full"
-                    onClick={() => removeImage(image.id)}
+                    onClick={() => setPendingImageId(image.id)}
                   >
                     <Trash2 className="mr-2 h-4 w-4" />
                     Supprimer
@@ -199,6 +215,34 @@ export default function ProductMedia({
           </div>
         )}
       </CardContent>
+
+      <AlertDialog
+        open={pendingImageId !== null}
+        onOpenChange={(open) => {
+          if (!open) setPendingImageId(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Supprimer cette image ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              La suppression est immédiate et cette image ne sera plus associée au produit.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isRemovingImage}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (pendingImageId) removeImage(pendingImageId);
+              }}
+              disabled={isRemovingImage}
+              className="bg-destructive"
+            >
+              {isRemovingImage ? "Suppression..." : "Supprimer"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }

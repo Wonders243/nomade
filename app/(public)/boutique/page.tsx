@@ -45,6 +45,7 @@ async function BoutiqueContent() {
 
   const products = data.map((p) => ({
     id: p.id,
+    slug: p.slug || String(p.id),
     name: p.name,
     price: p.price,
     images: p.cover_image ? [p.cover_image] : [],

@@ -13,6 +13,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type DiscountType = "fixed" | "percent";
 
@@ -52,6 +62,8 @@ export default function PromoCodesManager() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [form, setForm] = useState(initialForm);
+  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
+  const [deletingPromoId, setDeletingPromoId] = useState<number | null>(null);
 
   const activeCount = useMemo(
     () => promoCodes.filter((promo) => promo.is_active).length,
@@ -145,9 +157,7 @@ export default function PromoCodesManager() {
   }
 
   async function deletePromo(id: number) {
-    const confirmed = window.confirm("Supprimer ce code promo ?");
-    if (!confirmed) return;
-
+    setDeletingPromoId(id);
     setError("");
 
     try {
@@ -161,8 +171,11 @@ export default function PromoCodesManager() {
       }
 
       setPromoCodes((prev) => prev.filter((row) => row.id !== id));
+      setPendingDeleteId(null);
     } catch (err: any) {
       setError(err?.message || "Erreur de suppression.");
+    } finally {
+      setDeletingPromoId(null);
     }
   }
 
@@ -331,7 +344,7 @@ export default function PromoCodesManager() {
                       <Button
                         variant="destructive"
                         size="sm"
-                        onClick={() => deletePromo(promo.id)}
+                        onClick={() => setPendingDeleteId(promo.id)}
                       >
                         Supprimer
                       </Button>
@@ -343,6 +356,31 @@ export default function PromoCodesManager() {
           )}
         </CardContent>
       </Card>
+
+      <AlertDialog open={pendingDeleteId !== null} onOpenChange={(open) => {
+        if (!open) setPendingDeleteId(null);
+      }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Supprimer ce code promo ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette action est irréversible et supprime immédiatement le code promo sélectionné.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deletingPromoId !== null}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (pendingDeleteId !== null) deletePromo(pendingDeleteId);
+              }}
+              disabled={deletingPromoId !== null}
+              className="bg-destructive"
+            >
+              {deletingPromoId !== null ? "Suppression..." : "Supprimer"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

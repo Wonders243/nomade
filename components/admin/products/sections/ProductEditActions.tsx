@@ -42,6 +42,7 @@ export default function ProductEditActions({
         throw new Error(data.error || "Erreur suppression");
       }
 
+      setOpen(false);
       router.push("/admin/products");
       router.refresh();
     } catch (error) {

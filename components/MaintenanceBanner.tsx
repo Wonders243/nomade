@@ -128,9 +128,9 @@ export default function MaintenanceBanner() {
             </div>
 
             <p className="text-stone-300 text-sm leading-relaxed">
-              Notre collection est actuellement en préparation.
-              Les produits affichés sur le site sont présentés à
-              titre d&apos;aperçu.
+              La collection 1 est en cours de création.
+              Pour être informé dès son lancement, inscrivez-vous à la
+              newsletter.
             </p>
 
             <Link

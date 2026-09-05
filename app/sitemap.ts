@@ -1,6 +1,7 @@
 import { MetadataRoute } from "next";
 import { getCollections } from "@/lib/collections/queries";
 import { getProductsList } from "@/lib/products/queries";
+import { getProductRoute } from "@/lib/products/routing";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://scolta.nomade-artisan.fr";
@@ -91,7 +92,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }));
 
     const productUrls: MetadataRoute.Sitemap = products.map((product) => ({
-      url: `${baseUrl}/boutique/${product.slug || product.id}`,
+      url: `${baseUrl}${getProductRoute(product)}`,
       lastModified: product.created_at ? new Date(product.created_at) : now,
       changeFrequency: "weekly" as const,
       priority: 0.8,

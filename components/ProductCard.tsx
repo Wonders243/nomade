@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { getProductRoute } from "@/lib/products/routing";
 
 interface Product {
   id: number | string;
+  slug?: string | number | null;
   name: string;
   price: number;
   images?: string[] | string;
@@ -30,7 +32,7 @@ function ProductCard({
     ? product.images[0]
     : product.images || "";
 
-  const productSlug = (product as { slug?: string }).slug || String(product.id);
+  const productHref = getProductRoute(product as { slug?: string | null; id?: number | string | null });
 
   const price =
     typeof product.price === "string"
@@ -48,7 +50,7 @@ function ProductCard({
       : null;
 
   return (
-    <Link href={`/boutique/${productSlug}`} className="group block">
+    <Link href={productHref} className="group block">
       <div className="relative overflow-hidden rounded-none bg-stone-100 aspect-3/4 mb-3 shadow-sm group-hover:shadow-md transition-shadow duration-500">
         {/* Image */}
         {imageUrl ? (

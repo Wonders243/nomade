@@ -15,6 +15,17 @@ import { Label } from "@/components/ui/label";
 
 import { Trash2, Plus } from "lucide-react";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
 import { ProductFormState } from "../types";
 
 interface ProductDetailsProps {
@@ -55,6 +66,8 @@ export default function ProductDetails({
   setProduct,
 }: ProductDetailsProps) {
   const [detail, setDetail] = useState("");
+  const [pendingDetailIndex, setPendingDetailIndex] = useState<number | null>(null);
+  const [isRemovingDetail, setIsRemovingDetail] = useState(false);
 
   const specValues = useMemo(() => {
     const values: Record<string, string> = {};
@@ -125,10 +138,16 @@ export default function ProductDetails({
   }
 
   function removeDetail(index: number) {
-    setProduct((prev) => ({
-      ...prev,
-      details: prev.details.filter((_, i) => i !== index),
-    }));
+    setIsRemovingDetail(true);
+    try {
+      setProduct((prev) => ({
+        ...prev,
+        details: prev.details.filter((_, i) => i !== index),
+      }));
+    } finally {
+      setPendingDetailIndex(null);
+      setIsRemovingDetail(false);
+    }
   }
 
   return (
@@ -209,9 +228,7 @@ export default function ProductDetails({
                   type="button"
                   size="icon"
                   variant="ghost"
-                  onClick={() =>
-                    removeDetail(item.index)
-                  }
+                  onClick={() => setPendingDetailIndex(item.index)}
                 >
                   <Trash2 className="h-4 w-4 text-red-500" />
                 </Button>
@@ -225,6 +242,34 @@ export default function ProductDetails({
         )}
 
       </CardContent>
+
+      <AlertDialog
+        open={pendingDetailIndex !== null}
+        onOpenChange={(open) => {
+          if (!open) setPendingDetailIndex(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Retirer cette information ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette caractéristique sera supprimée du produit après confirmation.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isRemovingDetail}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (pendingDetailIndex !== null) removeDetail(pendingDetailIndex);
+              }}
+              disabled={isRemovingDetail}
+              className="bg-destructive"
+            >
+              {isRemovingDetail ? "Suppression..." : "Retirer"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }

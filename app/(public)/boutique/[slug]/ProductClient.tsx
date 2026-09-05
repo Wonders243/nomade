@@ -3,6 +3,7 @@
 import { useState, memo, useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { getProductRoute } from "@/lib/products/routing";
 import dynamic from "next/dynamic";
 import { Truck, RotateCcw, ShieldCheck } from "lucide-react";
 import { useCart } from "@/components/CartContext";
@@ -502,7 +503,7 @@ function RelatedProducts({ products }: { products: Product[] }) {
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-5 md:gap-10">
         {products.map((p) => (
-          <Link key={p.id} href={`/boutique/${p.slug || p.id}`} className="group">
+          <Link key={p.id} href={getProductRoute(p)} className="group">
             <div className="relative rounded-[22px] md:rounded-[24px] overflow-hidden bg-stone-100 aspect-4/5 mb-4">
               <Image
                 src={p.images[0] || "/placeholder.svg"}
