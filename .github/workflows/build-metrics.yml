@@ -8,8 +8,10 @@ on:
 jobs:
   build-metrics:
     runs-on: ubuntu-latest
+    env:
+      APP_URL: ${{ secrets.APP_URL || 'https://scolta.nomade-artisan.fr' }}
 
     steps:
       - name: Trigger analytics build
         run: |
-          curl -X GET https://www.preview.nomade-artisan.fr/api/analytics/build-metrics
+          curl -fsSL "$APP_URL/api/analytics/build-metrics"
