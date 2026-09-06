@@ -107,13 +107,38 @@ async function getProjectDailyContext(date: string) {
   };
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const today = new Date().toISOString().split("T")[0];
+    const url = new URL(request.url);
+    const forceAll = url.searchParams.get("all") === "true";
+    const overrideSinceDate = url.searchParams.get("since_date");
 
-    const { data: events, error: readError } = await supabase
+    let sinceDateIso: string | null = null;
+    if (!forceAll) {
+      const { data: latestMetricRow, error: latestMetricError } = await supabaseAdmin
+        .from("product_daily_metrics")
+        .select("metric_date")
+        .order("metric_date", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (!latestMetricError && latestMetricRow?.metric_date) {
+        sinceDateIso = new Date(`${latestMetricRow.metric_date}T00:00:00.000Z`).toISOString();
+      }
+    }
+
+    const effectiveSinceDate = overrideSinceDate || sinceDateIso;
+
+    let eventsQuery = supabase
       .from("analytics_events")
       .select("*");
+
+    if (!forceAll && effectiveSinceDate) {
+      eventsQuery = eventsQuery.gte("created_at", effectiveSinceDate);
+    }
+
+    const { data: events, error: readError } = await eventsQuery;
 
     if (readError) {
       throw readError;

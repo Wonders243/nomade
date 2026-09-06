@@ -85,9 +85,26 @@ async function getProjectDailyContext(date: string) {
 async function buildMetrics() {
   const today = new Date().toISOString().split("T")[0];
 
-  const { data: events } = await supabase
+  const { data: latestMetricRow } = await supabaseAdmin
+    .from("product_daily_metrics")
+    .select("metric_date")
+    .order("metric_date", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const sinceDate = latestMetricRow?.metric_date
+    ? new Date(`${latestMetricRow.metric_date}T00:00:00.000Z`).toISOString()
+    : null;
+
+  let eventsQuery = supabase
     .from("analytics_events")
     .select("*");
+
+  if (sinceDate) {
+    eventsQuery = eventsQuery.gte("created_at", sinceDate);
+  }
+
+  const { data: events } = await eventsQuery;
 
   if (!events) return;
 
