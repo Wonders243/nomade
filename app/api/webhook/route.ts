@@ -289,10 +289,10 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      // Analytics
-      await supabase.from("analytics_events").insert({
+      // Analytics : 1 événement par produit pour pouvoir agréger proprement par produit.
+      const purchaseAnalyticsRows = productIds.map((productId, index) => ({
         event_type: "purchase_completed",
-        product_id: productIds.join(","),
+        product_id: String(productId),
         metadata: {
           order_id: order.id,
           order_number: orderNumber,
@@ -303,8 +303,20 @@ export async function POST(req: NextRequest) {
           products: productIds,
           quantities,
           customer_email: customerEmail,
+          product_index: index,
+          quantity: Number(quantities[index] ?? 1),
         },
-      });
+      }));
+
+      if (purchaseAnalyticsRows.length > 0) {
+        const { error: analyticsError } = await supabase
+          .from("analytics_events")
+          .insert(purchaseAnalyticsRows);
+
+        if (analyticsError) {
+          console.error("Analytics purchase rows failed:", analyticsError);
+        }
+      }
 
       // Incrémenter l'utilisation du code promo
       const promoIdRaw = session.metadata?.promo_id;

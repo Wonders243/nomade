@@ -2,6 +2,17 @@ import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase/client";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
+function normalizeProductIds(rawValue: string | number | null | undefined): string[] {
+  if (rawValue == null || rawValue === "") return [];
+
+  const asString = String(rawValue);
+  return asString
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean)
+    .filter((value, index, array) => array.indexOf(value) === index);
+}
+
 export async function GET() {
   try {
     const today = new Date().toISOString().split("T")[0];
@@ -23,35 +34,38 @@ export async function GET() {
     }>();
 
     for (const event of events || []) {
-      const productId = event.product_id;
-      if (!productId) continue;
+      const productIds = normalizeProductIds(event.product_id);
 
-      if (!products.has(productId)) {
-        products.set(productId, {
-          views: 0,
-          carts: 0,
-          purchases: 0,
-          totalTime: 0,
-          timeCount: 0,
-        });
-      }
+      if (productIds.length === 0) continue;
 
-      const stats = products.get(productId)!;
+      for (const productId of productIds) {
+        if (!products.has(productId)) {
+          products.set(productId, {
+            views: 0,
+            carts: 0,
+            purchases: 0,
+            totalTime: 0,
+            timeCount: 0,
+          });
+        }
 
-      switch (event.event_type) {
-        case "product_view":
-          stats.views++;
-          break;
-        case "add_to_cart":
-          stats.carts++;
-          break;
-        case "purchase_completed":
-          stats.purchases++;
-          break;
-        case "product_time_spent":
-          stats.totalTime += Number(event.metadata?.seconds || 0);
-          stats.timeCount++;
-          break;
+        const stats = products.get(productId)!;
+
+        switch (event.event_type) {
+          case "product_view":
+            stats.views++;
+            break;
+          case "add_to_cart":
+            stats.carts++;
+            break;
+          case "purchase_completed":
+            stats.purchases++;
+            break;
+          case "product_time_spent":
+            stats.totalTime += Number(event.metadata?.seconds || 0);
+            stats.timeCount++;
+            break;
+        }
       }
     }
 
